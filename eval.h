@@ -9,29 +9,48 @@
 #include <string>
 #include <queue>
 #include <unordered_map>
+#include <unordered_set>
+#include <stdexcept>
 
 
-enum class TokenType {
-    None,
-    Number,
-    Operator,
-    Function,
-    Brace
+class SyntaxError: public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
 };
+
+class InputError: public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+};
+
+class InvalidSymbol: public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+};
+
+
+const std::unordered_set<char> whitespaces ({
+    ' ', '\n', '\t'
+});
 
 struct Token {
-    TokenType type = TokenType::None;
-    std::string value;
+    enum class Type {
+        Number,
+        Operator,
+        Symbol,
+        LeftBrace,
+        RightBrace
+    };
 
-    Token(const std::string& value, TokenType type);
-};
+    Type type = Type::Number;
+    std::string value = "0";
 
-enum class Associativity {
-    Left = 0,
-    Right = 1
+    Token(const std::string& value, Type type);
 };
 
 struct Operator {
+    enum class Associativity {
+        Left = 0,
+        Right = 1
+    };
+
     unsigned int priority = 0;
     Associativity assoc = Associativity::Left;
     double(*func)(double, double);
