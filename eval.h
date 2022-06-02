@@ -11,30 +11,20 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <stdexcept>
+#include <cmath>
+#include <cctype>
 
 
-class SyntaxError: public std::invalid_argument {
+class InvalidInput: public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
 };
 
-class InputError: public std::invalid_argument {
-    using std::invalid_argument::invalid_argument;
-};
-
-class InvalidSymbol: public std::invalid_argument {
-    using std::invalid_argument::invalid_argument;
-};
-
-
-const std::unordered_set<char> whitespaces ({
-    ' ', '\n', '\t'
-});
 
 struct Token {
     enum class Type {
-        Number,
+        Number = 0,
         Operator,
-        Symbol,
+        Name,
         LeftBrace,
         RightBrace
     };
@@ -42,8 +32,11 @@ struct Token {
     Type type = Type::Number;
     std::string value = "0";
 
-    Token(const std::string& value, Type type);
+    Token() = default;
+    Token(std::string value, Type type);
+    Token(const char chr, Type type);
 };
+
 
 struct Operator {
     enum class Associativity {
@@ -59,8 +52,31 @@ struct Operator {
 };
 
 
+const std::unordered_set<char> whitespaces ({
+    ' ', '\n', '\t'
+});
+
+namespace {
+    std::unordered_map<char, Operator> operators({
+         {'+', Operator(100, [](double a, double b){ return a + b; })},
+         {'-', Operator(100, [](double a, double b){ return a - b; })},
+         {'*', Operator(200, [](double a, double b){ return a * b; })},
+         {'/', Operator(200, [](double a, double b){ return a / b; })}
+    });
+
+    std::unordered_map<std::string, double(*)(double)> functions({
+            {"sin", [](double x){ return sin(x); }},
+            {"cos", [](double x){ return cos(x); }},
+            {"tan", [](double x){ return tan(x); }},
+            {"cot", [](double x){ return (1 / tan(x)); }},
+//            {"abs", [](double x){ return abs(x); }},
+            {"-", [](double x){ return -x; }}
+    });
+}
+
+
 std::queue<Token> tokenize(const std::string& expression);
-std::queue<std::string> shuntingYard(const std::vector<std::string>& tokens);
+std::queue<std::string> shuntingYard(std::queue<Token> tokens);
 double eval(const std::vector<std::string>& rpnExpression);
 
 

@@ -1,29 +1,45 @@
 #include <iostream>
-#include "unordered_map"
+#include "eval.h"
 
-
-double add(double l, double r) {
-    return l + r;
+std::ostream& operator<<(std::ostream& stream, Token::Type type) {
+    switch (type) {
+        case Token::Type::Number: {
+            stream << "Number";
+            break;
+        }
+        case Token::Type::Operator: {
+            stream << "Operator";
+            break;
+        }
+        case Token::Type::Name: {
+            stream << "Name";
+            break;
+        }
+        case Token::Type::LeftBrace: {
+            stream << "LeftBrace";
+            break;
+        }
+        case Token::Type::RightBrace: {
+            stream << "RightBrace";
+            break;
+        }
+    }
+    return stream;
 }
 
-double mul(double l, double r) {
-    return l * r;
+std::ostream& operator<<(std::ostream& stream, Token& token) {
+    stream << token.type << ":" << token.value;
+    return stream;
 }
-
-std::unordered_map<std::string, double(*)(double, double)> operators ({
-    {"+", &add},
-    {"*", &mul}
-});
-
 
 int main() {
 
-    // ... code ...
-
-    std::cout << operators.at("+")(10, 4) << std::endl;
-    std::cout << operators.at("*")(10, 4) << std::endl;
-
-    // ... code ...
+    auto tokens = tokenize("(5 + 5) * 2");
+    while (!tokens.empty()) {
+        std::cout << tokens.front() << ", ";
+        tokens.pop();
+    }
+    std::cout << std::endl;
 
     return 0;
 }
