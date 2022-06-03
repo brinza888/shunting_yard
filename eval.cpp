@@ -210,9 +210,8 @@ vector<Token> shuntingYard(const vector<Token>& input) {
         }
         else if (token.type == Token::Type::Operator) {
             Operator* cur = token.value.oper;
-            Token top;
             while (!stack.empty()) {
-                top = stack.top();
+                Token top = stack.top();
                 if (top.type == Token::Type::Operator) {
                     Operator* op = top.value.oper;
                     if (op->priority > cur->priority ||
@@ -274,7 +273,7 @@ double eval(const vector<Token>& rpnExpression) {
         }
         else if (token.type == Token::Type::Operator) {
             if (stack.size() < 2) {
-                throw SyntaxError("Not enough operands for Operator " + token.value.oper->name);
+                throw SyntaxError("Not enough operands for operator: " + token.value.oper->name);
             }
             double b = stack.top();
             stack.pop();
@@ -285,7 +284,7 @@ double eval(const vector<Token>& rpnExpression) {
         else if (token.type == Token::Type::Function) {
             size_t argc = token.value.func->argc;
             if (stack.size() < argc) {
-                throw SyntaxError("Not enough arguments for Function " + token.value.func->name);
+                throw SyntaxError("Not enough arguments for function: " + token.value.func->name);
             }
             vector<double> args;
             for (size_t i = 0; i < argc; i++) {
