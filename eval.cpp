@@ -3,10 +3,12 @@
 //
 
 #include "eval.h"
+#include "iostream"
 #include <cctype>
 #include <stack>
 
 using namespace std;
+using namespace Eval;
 
 
 Operator::Operator(const string& name, unsigned int priority, double(*func)(double, double), Associativity assoc):
@@ -57,6 +59,28 @@ Token::Token(char brace) {
     }
 }
 
+std::ostream& Eval::operator<<(std::ostream& stream, Token token) {
+    if (token.type == Token::Type::Number) {
+        stream << token.value.number;
+    }
+    else if (token.type == Token::Type::LeftBrace) {
+        stream << "(";
+    }
+    else if (token.type == Token::Type::RightBrace) {
+        stream << ")";
+    }
+    else if (token.type == Token::Type::Operator) {
+        stream << token.value.oper->name;
+    }
+    else if (token.type == Token::Type::Function) {
+        stream << token.value.func->name;
+    }
+    else if (token.type == Token::Type::ArgsSep) {
+        stream << ',';
+    }
+    return stream;
+}
+
 string constructNumber(string::const_iterator& it, string::const_iterator end) {
     string value;
     bool dotExists = false;
@@ -90,7 +114,7 @@ string constructName(string::const_iterator& it, string::const_iterator end) {
     return value;
 }
 
-vector<Token> tokenize(const string& expression) {
+vector<Token> Eval::tokenize(const string& expression) {
     vector<Token> tokens;
 
     OperatorMap::const_iterator operatorIt;
@@ -181,7 +205,7 @@ vector<Token> tokenize(const string& expression) {
     return tokens;
 }
 
-vector<Token> shuntingYard(const vector<Token>& input) {
+vector<Token> Eval::shuntingYard(const vector<Token>& input) {
     stack<Token> stack;
     vector<Token> output;
 
@@ -265,7 +289,7 @@ vector<Token> shuntingYard(const vector<Token>& input) {
     return output;
 }
 
-double eval(const vector<Token>& rpnExpression) {
+double Eval::eval(const vector<Token>& rpnExpression) {
     stack<double> stack;
     for (auto&& token: rpnExpression) {
         if (token.type == Token::Type::Number) {
@@ -301,4 +325,11 @@ double eval(const vector<Token>& rpnExpression) {
         throw SyntaxError("Calculation finished with stack size greater than 1");
     }
     return stack.top();
+}
+
+double Eval::eval(const std::string& expression) {
+    auto tokens = tokenize(expression);
+    auto rpn = shuntingYard(tokens);
+    double result = eval(rpn);
+    return result;
 }

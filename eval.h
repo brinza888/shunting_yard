@@ -23,58 +23,60 @@ class SyntaxError: public std::invalid_argument {
 };
 
 
-struct Operator {
-    enum class Associativity {
-        Left = 0,
-        Right = 1
+namespace Eval {
+    struct Operator {
+        enum class Associativity {
+            Left = 0,
+            Right = 1
+        };
+
+        const std::string name;
+        unsigned int priority = 0;
+        Associativity assoc = Associativity::Left;
+        double(*func)(double, double);
+
+        Operator(const std::string& name,
+                 unsigned int priority,
+                 double(*func)(double, double),
+                 Associativity assoc = Associativity::Left);
     };
 
-    const std::string name;
-    unsigned int priority = 0;
-    Associativity assoc = Associativity::Left;
-    double(*func)(double, double);
+    struct Function {
+        const std::string name;
+        size_t argc = 1;
+        double(*func)(std::vector<double>&);
 
-    Operator(const std::string& name,
-             unsigned int priority,
-             double(*func)(double, double),
-             Associativity assoc = Associativity::Left);
-};
-
-struct Function {
-    const std::string name;
-    size_t argc = 1;
-    double(*func)(std::vector<double>&);
-
-    Function(const std::string& name, size_t argc, double(*func)(std::vector<double>&));
-};
-
-struct Token {
-    enum class Type {
-        Number = 0,
-        Operator,
-        Function,
-        LeftBrace,
-        RightBrace,
-        ArgsSep
+        Function(const std::string& name, size_t argc, double(*func)(std::vector<double>&));
     };
 
-    union UValue {
-        double number = 0;
-        Operator* oper;
-        Function* func;
-    } value;
+    struct Token {
+        enum class Type {
+            Number = 0,
+            Operator,
+            Function,
+            LeftBrace,
+            RightBrace,
+            ArgsSep
+        };
 
-    Type type = Type::Number;
+        union UValue {
+            double number = 0;
+            Operator* oper;
+            Function* func;
+        } value;
 
-    Token() = default;
-    Token(Type type);
-    Token(double number);
-    Token(Operator* oper);
-    Token(Function* func);
-    Token(char brace);
-};
+        Type type = Type::Number;
 
-namespace {
+        Token() = default;
+        Token(Type type);
+        Token(double number);
+        Token(Operator* oper);
+        Token(Function* func);
+        Token(char brace);
+    };
+
+    std::ostream& operator<<(std::ostream& stream, Token token);
+
     using OperatorMap = typename std::unordered_map<char, Operator*>;
     using FunctionMap = typename std::unordered_map<std::string, Function*>;
 
@@ -123,12 +125,12 @@ namespace {
         UNARY = 0,
         BINARY = 1
     };
+
+    std::vector<Token> tokenize(const std::string& expression);
+    std::vector<Token> shuntingYard(const std::vector<Token>& input);
+    double eval(const std::vector<Token>& rpnExpression);
+    double eval(const std::string& expression);
 }
-
-
-std::vector<Token> tokenize(const std::string& expression);
-std::vector<Token> shuntingYard(const std::vector<Token>& input);
-double eval(const std::vector<Token>& rpnExpression);
 
 
 #endif //SHUNTING_YARD_EVAL_H
