@@ -101,34 +101,66 @@ vector<Token> tokenize(const string& expression) {
 
     while (it != expression.cend()) {
         if (whitespaces.find(*it) != whitespaces.cend()) {
-
+            // handle whitespace characters
         }
-        else if (isdigit(*it) || *it == '.') {  // construct number
+        else if (isdigit(*it) || *it == '.') {  // handle number
+            if (!tokens.empty() && (tokens.back().type != Token::Type::Operator &&
+                                    tokens.back().type != Token::Type::LeftBrace &&
+                                    tokens.back().type != Token::Type::ArgsSep)) {
+                throw SyntaxError("Missing '(' or ',' or operator  before number");
+            }
             string numberStr = constructNumber(it, expression.cend());
             double number = stod(numberStr);
             tokens.emplace(tokens.end(), number);
             minusState = MinusState::BINARY;
             continue;
         }
-        else if ((operatorIt = operators.find(*it)) != operators.cend()) {
+        else if ((operatorIt = operators.find(*it)) != operators.cend()) {  // handle operator
             Operator* oper = operatorIt->second;
-            if (minusState == MinusState::UNARY && oper->name == "-") {  // Handle unary minus
+            if (minusState == MinusState::UNARY && oper->name == "-") {  // handle unary minus
                 tokens.emplace(tokens.end(), 0.0);
+            }
+            else {  // check binary operators
+                if (!tokens.empty() && (tokens.back().type != Token::Type::Number &&
+                                        tokens.back().type != Token::Type::RightBrace)) {
+                    throw SyntaxError("Missing ')' or number before binary operator");
+                }
             }
             tokens.emplace(tokens.end(), oper);
         }
         else if (*it == '(') {
+            if (!tokens.empty() && (tokens.back().type != Token::Type::Operator &&
+                                    tokens.back().type != Token::Type::Function &&
+                                    tokens.back().type != Token::Type::LeftBrace &&
+                                    tokens.back().type != Token::Type::ArgsSep)) {
+                throw SyntaxError("Missing '(' or ',' or operator or function before '('");
+            }
             tokens.emplace(tokens.end(), *it);
             minusState = MinusState::UNARY;
         }
         else if (*it == ')') {
+            if (!tokens.empty() && (tokens.back().type != Token::Type::Number &&
+                                    tokens.back().type != Token::Type::RightBrace)) {
+                throw SyntaxError("Missing ')' or number before ')'");
+            }
             tokens.emplace(tokens.end(), *it);
             minusState = MinusState::BINARY;
         }
         else if (*it == ',') {
+            if (tokens.empty() ||
+                !tokens.empty() && (tokens.back().type != Token::Type::Number &&
+                                    tokens.back().type != Token::Type::RightBrace)) {
+                throw SyntaxError("Missing ')' or number before ','");
+            }
             tokens.emplace(tokens.end(), Token::Type::ArgsSep);
+            minusState = MinusState::UNARY;
         }
-        else if (isalpha(*it)) {  // construct symbol
+        else if (isalpha(*it)) {  // handle function name
+            if (!tokens.empty() && (tokens.back().type != Token::Type::Operator &&
+                                    tokens.back().type != Token::Type::LeftBrace &&
+                                    tokens.back().type != Token::Type::ArgsSep)) {
+                throw SyntaxError("Missing operator before function");
+            }
             string name = constructName(it, expression.cend());
             functionIt = functions.find(name);
             if (functionIt != functions.cend()) {
@@ -140,10 +172,10 @@ vector<Token> tokenize(const string& expression) {
             minusState = MinusState::BINARY;
             continue;
         }
-        else {
-            throw InvalidInput("Invalid char in input");
+        else {  // if no one case success
+            throw InvalidInput("Invalid char: " + string(1, *it));
         }
-        it++;
+        ++it;
     }
 
     return tokens;
