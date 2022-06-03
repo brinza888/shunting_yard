@@ -4,7 +4,6 @@
 
 #include "eval.h"
 #include <cctype>
-#include <cmath>
 #include <stack>
 
 using namespace std;
@@ -51,14 +50,6 @@ Token::Token(char brace) {
     else {
         throw InvalidInput("Excepted brace");
     }
-}
-
-bool isOperator(const char name) {
-    return (operators.find(name) != operators.end());
-}
-
-bool isFunction(const string& name) {
-    return (functions.find(name) != functions.end());
 }
 
 string constructNumber(string::const_iterator& it, string::const_iterator end) {
