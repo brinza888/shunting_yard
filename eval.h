@@ -85,7 +85,7 @@ namespace {
          {'-', new Operator("-", 100, [](double a, double b){ return a - b; })},
          {'*', new Operator("*", 200, [](double a, double b){ return a * b; })},
          {'/', new Operator("/", 200, [](double a, double b){ return a / b; })},
-         {'^', new Operator("/", 300, [](double a, double b){ return std::pow(a, b); }, Operator::Associativity::Right)}
+         {'^', new Operator("^", 300, [](double a, double b){ return std::pow(a, b); }, Operator::Associativity::Right)}
     });
 
     const FunctionMap functions({
