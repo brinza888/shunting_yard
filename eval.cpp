@@ -93,6 +93,8 @@ vector<Token> tokenize(const string& expression) {
     FunctionMap::const_iterator functionIt;
     auto it = expression.cbegin();
 
+    MinusState minusState = MinusState::UNARY;
+
     while (it != expression.cend()) {
         if (whitespaces.find(*it) != whitespaces.cend()) {
 
@@ -101,13 +103,23 @@ vector<Token> tokenize(const string& expression) {
             string numberStr = constructNumber(it, expression.cend());
             double number = stod(numberStr);
             tokens.emplace(tokens.end(), number);
+            minusState = MinusState::BINARY;
             continue;
         }
         else if ((operatorIt = operators.find(*it)) != operators.cend()) {
-            tokens.emplace(tokens.end(), operatorIt->second);
+            Operator* oper = operatorIt->second;
+            if (minusState == MinusState::UNARY && oper->name == "-") {  // Handle unary minus
+                tokens.emplace(tokens.end(), 0.0);
+            }
+            tokens.emplace(tokens.end(), oper);
         }
-        else if (*it == '(' || *it == ')') {
+        else if (*it == '(') {
             tokens.emplace(tokens.end(), *it);
+            minusState = MinusState::UNARY;
+        }
+        else if (*it == ')') {
+            tokens.emplace(tokens.end(), *it);
+            minusState = MinusState::BINARY;
         }
         else if (isalpha(*it)) {  // construct symbol
             string name = constructName(it, expression.cend());
@@ -118,6 +130,7 @@ vector<Token> tokenize(const string& expression) {
             else {
                 throw InvalidInput("Function not exists: " + name);
             }
+            minusState = MinusState::BINARY;
             continue;
         }
         else {

@@ -72,11 +72,6 @@ struct Token {
     Token(char brace);
 };
 
-
-const std::unordered_set<char> whitespaces ({
-    ' ', '\n', '\t'
-});
-
 namespace {
     using OperatorMap = typename std::unordered_map<char, Operator*>;
     using FunctionMap = typename std::unordered_map<std::string, Function*>;
@@ -86,8 +81,7 @@ namespace {
          {'-', new Operator("-", 100, [](double a, double b){ return a - b; })},
          {'*', new Operator("*", 200, [](double a, double b){ return a * b; })},
          {'/', new Operator("/", 200, [](double a, double b){ return a / b; })},
-         {'^', new Operator("^", 300, [](double a, double b){ return std::pow(a, b); }, Operator::Associativity::Right)},
-         {'u', new Operator("u", 400, [](double a, double b){ return -a; })}
+         {'^', new Operator("^", 300, [](double a, double b){ return std::pow(a, b); }, Operator::Associativity::Right)}
     });
 
     const FunctionMap functions({
@@ -103,6 +97,15 @@ namespace {
                 else return 0.0;
             })}
     });
+
+    const std::unordered_set<char> whitespaces ({
+            ' ', '\n', '\t'
+    });
+
+    enum class MinusState {
+        UNARY = 0,
+        BINARY = 1
+    };
 }
 
 
