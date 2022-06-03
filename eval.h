@@ -42,9 +42,10 @@ struct Operator {
 
 struct Function {
     const std::string name;
-    double(*func)(double);
+    size_t argc = 1;
+    double(*func)(std::vector<double>&);
 
-    Function(const std::string& name, double(*func)(double));
+    Function(const std::string& name, size_t argc, double(*func)(std::vector<double>&));
 };
 
 struct Token {
@@ -85,17 +86,18 @@ namespace {
          {'-', new Operator("-", 100, [](double a, double b){ return a - b; })},
          {'*', new Operator("*", 200, [](double a, double b){ return a * b; })},
          {'/', new Operator("/", 200, [](double a, double b){ return a / b; })},
-         {'^', new Operator("^", 300, [](double a, double b){ return std::pow(a, b); }, Operator::Associativity::Right)}
+         {'^', new Operator("^", 300, [](double a, double b){ return std::pow(a, b); }, Operator::Associativity::Right)},
+         {'u', new Operator("u", 400, [](double a, double b){ return -a; })}
     });
 
     const FunctionMap functions({
-            {"sin", new Function("sin", [](double x){ return std::sin(x); })},
-            {"cos", new Function("cos", [](double x){ return std::cos(x); })},
-            {"tan", new Function("tan", [](double x){ return std::tan(x); })},
-            {"cot", new Function("cot", [](double x){ return (1 / std::tan(x)); })},
-            {"abs", new Function("abs", [](double x){ return std::abs(x); })},
-            {"-u", new Function("unary_minus", [](double x){ return -x; })},
-            {"sgn", new Function("sgn", [](double x){
+            {"sin", new Function("sin", 1, [](std::vector<double>& args){ return std::sin(args[0]); })},
+            {"cos", new Function("cos", 1, [](std::vector<double>& args){ return std::cos(args[0]); })},
+            {"tan", new Function("tan", 1, [](std::vector<double>& args){ return std::tan(args[0]); })},
+            {"cot", new Function("cot", 1, [](std::vector<double>& args){ return (1 / std::tan(args[0])); })},
+            {"abs", new Function("abs", 1, [](std::vector<double>& args){ return std::abs(args[0]); })},
+            {"sgn", new Function("sgn", 1, [](std::vector<double>& args){
+                double x = args[0];
                 if (x > 0) return 1.0;
                 else if (x < 0) return -1.0;
                 else return 0.0;

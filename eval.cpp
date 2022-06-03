@@ -18,9 +18,10 @@ Operator::Operator(const string& name, unsigned int priority, double(*func)(doub
 
 }
 
-Function::Function(const string& name, double (*func)(double)):
+Function::Function(const string& name, size_t argc, double (*func)(vector<double>& args)):
     name(name),
-    func(func)
+    func(func),
+    argc(argc)
 {
 
 }
@@ -213,12 +214,16 @@ double eval(const vector<Token>& rpnExpression) {
             stack.push(token.value.oper->func(a, b));
         }
         else if (token.type == Token::Type::Function) {
-            if (stack.size() < 1) {
+            size_t argc = token.value.func->argc;
+            if (stack.size() < argc) {
                 throw SyntaxError("Not enough arguments for Function " + token.value.func->name);
             }
-            double x = stack.top();
-            stack.pop();
-            stack.push(token.value.func->func(x));
+            vector<double> args;
+            for (size_t i = 0; i < argc; i++) {
+                args.insert(args.begin(), stack.top());
+                stack.pop();
+            }
+            stack.push(token.value.func->func(args));
         }
         else {
             throw SyntaxError("In RPN met not allowed token: " + std::to_string(static_cast<int>(token.type)));

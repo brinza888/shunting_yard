@@ -4,7 +4,7 @@
 
 int main() {
 
-    auto tokens = tokenize("2 * sgn(12) * 2 + sin(3)");
+    auto tokens = tokenize("2 * sgn(12) * 2 + sin(3) * 0");
     auto rpn = shuntingYard(tokens);
     double result = eval(rpn);
 
