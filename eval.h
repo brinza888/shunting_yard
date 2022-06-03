@@ -54,7 +54,8 @@ struct Token {
         Operator,
         Function,
         LeftBrace,
-        RightBrace
+        RightBrace,
+        ArgsSep
     };
 
     union UValue {
@@ -66,6 +67,7 @@ struct Token {
     Type type = Type::Number;
 
     Token() = default;
+    Token(Type type);
     Token(double number);
     Token(Operator* oper);
     Token(Function* func);
@@ -81,15 +83,30 @@ namespace {
          {'-', new Operator("-", 100, [](double a, double b){ return a - b; })},
          {'*', new Operator("*", 200, [](double a, double b){ return a * b; })},
          {'/', new Operator("/", 200, [](double a, double b){ return a / b; })},
-         {'^', new Operator("^", 300, [](double a, double b){ return std::pow(a, b); }, Operator::Associativity::Right)}
+         {'^', new Operator("^", 300, [](double a, double b){
+                return std::pow(a, b);
+             }, Operator::Associativity::Right)}
     });
 
     const FunctionMap functions({
-            {"sin", new Function("sin", 1, [](std::vector<double>& args){ return std::sin(args[0]); })},
-            {"cos", new Function("cos", 1, [](std::vector<double>& args){ return std::cos(args[0]); })},
-            {"tan", new Function("tan", 1, [](std::vector<double>& args){ return std::tan(args[0]); })},
-            {"cot", new Function("cot", 1, [](std::vector<double>& args){ return (1 / std::tan(args[0])); })},
-            {"abs", new Function("abs", 1, [](std::vector<double>& args){ return std::abs(args[0]); })},
+            {"sin", new Function("sin", 1, [](std::vector<double>& args){
+                return std::sin(args[0]);
+            })},
+            {"cos", new Function("cos", 1, [](std::vector<double>& args){
+                return std::cos(args[0]);
+            })},
+            {"tan", new Function("tan", 1, [](std::vector<double>& args) {
+                return std::tan(args[0]);
+            })},
+            {"cot", new Function("cot", 1, [](std::vector<double>& args){
+                return (1 / std::tan(args[0]));
+            })},
+            {"abs", new Function("abs", 1, [](std::vector<double>& args){
+                return std::abs(args[0]);
+            })},
+            {"pow", new Function("pow", 2, [](std::vector<double>& args){
+                return std::pow(args[0], args[1]);
+            })},
             {"sgn", new Function("sgn", 1, [](std::vector<double>& args){
                 double x = args[0];
                 if (x > 0) return 1.0;

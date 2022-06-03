@@ -41,6 +41,10 @@ Token::Token(Function* func) {
     type = Type::Function;
 }
 
+Token::Token(Token::Type type) {
+    this->type = type;
+}
+
 Token::Token(char brace) {
     if (brace == '(') {
         type = Type::LeftBrace;
@@ -121,6 +125,9 @@ vector<Token> tokenize(const string& expression) {
             tokens.emplace(tokens.end(), *it);
             minusState = MinusState::BINARY;
         }
+        else if (*it == ',') {
+            tokens.emplace(tokens.end(), Token::Type::ArgsSep);
+        }
         else if (isalpha(*it)) {  // construct symbol
             string name = constructName(it, expression.cend());
             functionIt = functions.find(name);
@@ -153,10 +160,27 @@ vector<Token> shuntingYard(const vector<Token>& input) {
         else if (token.type == Token::Type::Function) {
             stack.push(token);
         }
+        else if (token.type == Token::Type::ArgsSep) {
+            Token top;
+            bool argsCheck = false;
+            while (!stack.empty()) {
+                top = stack.top();
+                if (top.type == Token::Type::LeftBrace) {
+                    argsCheck = true;
+                    break;
+                }
+                output.push_back(top);
+                stack.pop();
+            }
+            if (!argsCheck) {
+                throw SyntaxError("Missing argument separator ',' or left brace '(' in expression");
+            }
+        }
         else if (token.type == Token::Type::Operator) {
             Operator* cur = token.value.oper;
+            Token top;
             while (!stack.empty()) {
-                Token top = stack.top();
+                top = stack.top();
                 if (top.type == Token::Type::Operator) {
                     Operator* op = top.value.oper;
                     if (op->priority > cur->priority ||

@@ -18,6 +18,9 @@ std::ostream& operator<<(std::ostream& stream, Token token) {
     else if (token.type == Token::Type::Function) {
         stream << token.value.func->name;
     }
+    else if (token.type == Token::Type::ArgsSep) {
+        stream << ',';
+    }
     return stream;
 }
 
