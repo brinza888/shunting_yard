@@ -10,32 +10,13 @@
 using namespace std;
 
 
-//namespace {
-//    std::unordered_map<char, Operator> operators({
-//       {'+', Operator(100, [](double a, double b){ return a + b; })},
-//       {'-', Operator(100, [](double a, double b){ return a - b; })},
-//       {'*', Operator(200, [](double a, double b){ return a * b; })},
-//       {'/', Operator(200, [](double a, double b){ return a / b; })}
-//    });
-//
-//    std::unordered_map<string, double(*)(double)> functions({
-//        {"sin", [](double x){ return sin(x); }},
-//        {"cos", [](double x){ return cos(x); }},
-//        {"tan", [](double x){ return tan(x); }},
-//        {"cot", [](double x){ return (1 / tan(x)); }},
-//        {"abs", [](double x){ return abs(x); }},
-//        {"-", [](double x){ return -x; }}
-//    });
-//}
-
-
 Operator::Operator(unsigned int priority, double(*func)(double, double), Associativity assoc) {
     this->priority = priority;
     this->func = func;
     this->assoc = assoc;
 }
 
-Token::Token(std::string value, Type type) {
+Token::Token(string value, Type type) {
     this->value = value;
     this->type = type;
 }
@@ -123,14 +104,22 @@ queue<Token> tokenize(const string& expression) {
     return tokens;
 }
 
-queue<string> shuntingYard(queue<Token> tokens) {
+queue<string> shuntingYard(queue<Token> input) {
     stack<Token> stack;
+    queue<Token> output;
     Token token;
+    Token top;
 
-    while (!tokens.empty()) {
-        token = tokens.front();
-        tokens.pop();
-        switch ()
+    while (!input.empty()) {
+        token = input.front();
+        input.pop();
+        if (token.type == Token::Type::Number) {
+            output.push(token);
+        }
+        else if (token.type == Token::Type::Operator) {
+            top = stack.top();
+            while (top.)
+        }
     }
 
     return queue<string>();

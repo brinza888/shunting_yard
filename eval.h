@@ -65,12 +65,12 @@ namespace {
     });
 
     std::unordered_map<std::string, double(*)(double)> functions({
-            {"sin", [](double x){ return sin(x); }},
-            {"cos", [](double x){ return cos(x); }},
-            {"tan", [](double x){ return tan(x); }},
-            {"cot", [](double x){ return (1 / tan(x)); }},
-//            {"abs", [](double x){ return abs(x); }},
-            {"-", [](double x){ return -x; }}
+            {"sin", [](double x){ return std::sin(x); }},
+            {"cos", [](double x){ return std::cos(x); }},
+            {"tan", [](double x){ return std::tan(x); }},
+            {"cot", [](double x){ return (1 / std::tan(x)); }},
+            {"abs", [](double x){ return std::abs(x); }},
+            {"_minus", [](double x){ return -x; }}
     });
 }
 
